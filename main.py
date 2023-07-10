@@ -102,8 +102,8 @@ def beautify(msg):
 
 if __name__ == '__main__':
     try:
-        channel_url = 'https://www.youtube.com/@ludwig' # Debug: https://www.youtube.com/@Jw2pg
-        months = 3
+        channel_url = 'https://www.youtube.com/@alanbecker' 
+        months = 9
         display = 5 # How many vid
         greaterLength = timedelta(minutes=1)
 

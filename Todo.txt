@@ -1,0 +1,5 @@
+1. Debug this case: https://www.youtube.com/@Jw2pg -> cant get request
+
+2. speed up the process
+
+3. convert to rust -> faster
