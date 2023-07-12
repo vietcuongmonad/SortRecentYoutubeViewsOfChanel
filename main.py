@@ -113,7 +113,7 @@ def beautify(msg):
 
 if __name__ == '__main__':
     try:
-        channel_username = "SumiyaOfficial"
+        channel_username = "ComedyCentral"
         channel_url = "https://www.youtube.com/@" + channel_username
         months = 1
         display = 5 # How many vid

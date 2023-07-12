@@ -3,3 +3,12 @@ output.json
 .env
 tryOut.ts
 Todo.txt
+
+# Added by cargo
+
+/target
+Cargo.lock
+src/draft.rs
+limbo.json
+output.md
+Result.md
