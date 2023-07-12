@@ -12,3 +12,4 @@ src/draft.rs
 limbo.json
 output.md
 Result.md
+.vscode

@@ -1,1 +1,1 @@
-1. filter out short
+put this into try (...) catch
