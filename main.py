@@ -15,16 +15,27 @@ DEVELOPER_KEY = os.getenv('DEVELOPER_KEY')
 YT_API_SERVICE_NAME = 'youtube'
 YT_API_VERSION = 'v3'
 
-def get_channel_id(channel_url):
+youtube = build(YT_API_SERVICE_NAME, YT_API_VERSION, developerKey=DEVELOPER_KEY)
+
+def get_channel_id_by_url(channel_url):
     response = requests.get(channel_url)
     match = re.search(r'\/channel\/(.*?)\"', response.text)
     if match:
         return match.group(1)
     else:
         return None
+    
+def get_channel_id_by_username(username):
+    search_response = youtube.search().list(
+        type='channel',
+        q=username,
+        part='id'
+    ).execute()
+
+    return search_response['items'][0]['id']['channelId']
 
 def get_recent_vids(channel_id, months = 3, greaterLength = timedelta(minutes = 0)):
-    youtube = build(YT_API_SERVICE_NAME, YT_API_VERSION, developerKey=DEVELOPER_KEY)
+    
 
     # Get the channel's uploads playlist ID
     channels_response = youtube.channels().list(
@@ -102,12 +113,14 @@ def beautify(msg):
 
 if __name__ == '__main__':
     try:
-        channel_url = 'https://www.youtube.com/@alanbecker' 
-        months = 9
+        channel_username = "SumiyaOfficial"
+        channel_url = "https://www.youtube.com/@" + channel_username
+        months = 1
         display = 5 # How many vid
         greaterLength = timedelta(minutes=1)
 
-        channel_id = get_channel_id(channel_url) #'UCObk_g1hQBy0RKKriVX_zOQ'
+        # channel_id = get_channel_id_by_url(channel_url) 
+        channel_id = get_channel_id_by_username(channel_username) # use this for some channel that create custom channel
         vids = get_recent_vids(channel_id, months, greaterLength)
         vids = filterVideos(vids, display)
         output(vids)
