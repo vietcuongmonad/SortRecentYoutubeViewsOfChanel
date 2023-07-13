@@ -60,9 +60,9 @@ async fn get_channel_videos(channel_id: String, api_key: String, max_recent_vid:
         let (view_count, duration) = get_view_count_and_duration(video_id.clone(), api_key.clone()).await?;
 
         // println!("duration = {}", duration);
-        // if !is_greater_than_one_minute(&duration) {
-        //     continue;
-        // }
+        if !is_greater_than_one_minute(&duration) {
+            continue;
+        }
 
         let title = item["snippet"]["title"].as_str().unwrap().to_string();
         let thumbnail = item["snippet"]["thumbnails"]["default"]["url"].as_str().unwrap().to_string();
@@ -89,7 +89,7 @@ async fn get_view_count_and_duration(video_id: String, developer_key: String) ->
     let response = reqwest::get(&url).await?.text().await?;
     let video_data: Value = serde_json::from_str(&response)?;
 
-    print_pretty_json(&video_data).await?;
+    // print_pretty_json(&video_data).await?;
 
     let view_count = video_data["items"][0]["statistics"]["viewCount"]
         .as_str()
@@ -97,7 +97,7 @@ async fn get_view_count_and_duration(video_id: String, developer_key: String) ->
         .parse()
         .unwrap();
 
-    let duration = video_data["item"][0]["contentDetail"]["duration"].as_str().unwrap().to_string();
+    let duration = video_data["items"][0]["contentDetails"]["duration"].as_str().unwrap().to_string();
 
 
     Ok((view_count, duration))
@@ -118,15 +118,21 @@ fn display_vid(videos: Vec<(String, u64, String, String)>, mut max_display_vid: 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let channel_username = "ChocolateSundaes";
-    let max_recent_vid = 10;
+    let max_recent_vid = 100;
     let max_display_vid = 10;
 
     dotenv().ok();
     let developer_key = env::var("DEVELOPER_KEY").expect("DEVELOPER_KEY must be set");
 
-    let channel_id = get_channel_id(channel_username.to_string().clone(), developer_key.clone()).await?;
-    let videos = get_channel_videos(channel_id, developer_key, max_recent_vid).await.unwrap();
-    display_vid(videos, max_display_vid);
+    match get_channel_id(channel_username.to_string().clone(), developer_key.clone()).await {
+        Ok(channel_id) => {
+            match get_channel_videos(channel_id, developer_key, max_recent_vid).await {
+                Ok(videos) => display_vid(videos, max_display_vid),
+                Err(e) => eprintln!("Error getting videos: \n{}", e)
+            } 
+        }    
+        Err(e) => eprintln!("Error getting channel ID:\n{}", e)
+    }
 
     Ok(())
 }
