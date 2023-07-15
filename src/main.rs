@@ -36,7 +36,12 @@ async fn get_channel_id(channel_name: String, api_key: String) -> Result<String,
     Ok(channel_id)
 }
 
-async fn get_channel_videos(channel_id: String, api_key: String, max_recent_vid: u64) 
+async fn get_channel_videos(
+    channel_id: String, 
+    api_key: String, 
+    max_recent_vid: u64, 
+    no_short: Option<bool>
+) 
 -> Result<Vec<(String, u64, String, String)>, Box<dyn std::error::Error>> {
     let url = format!("https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id={}&key={}", channel_id, api_key);
 
@@ -51,6 +56,8 @@ async fn get_channel_videos(channel_id: String, api_key: String, max_recent_vid:
 
     // print_pretty_json(&video_data).await?;
 
+    let no_short = no_short.unwrap();
+
     let mut videos = Vec::new();
 
     let items = video_data["items"].as_array().unwrap();
@@ -59,8 +66,8 @@ async fn get_channel_videos(channel_id: String, api_key: String, max_recent_vid:
         let video_id = item["snippet"]["resourceId"]["videoId"].as_str().unwrap().to_string();
         let (view_count, duration) = get_view_count_and_duration(video_id.clone(), api_key.clone()).await?;
 
-        // println!("duration = {}", duration);
-        if !is_greater_than_one_minute(&duration) {
+        // // println!("duration = {}", duration);
+        if no_short && !is_greater_than_one_minute(&duration) {
             continue;
         }
 
@@ -117,16 +124,17 @@ fn display_vid(videos: Vec<(String, u64, String, String)>, mut max_display_vid: 
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let channel_username = "ChocolateSundaes";
+    let channel_username = "emetsound";    // debug this
     let max_recent_vid = 100;
     let max_display_vid = 10;
+    let no_shorts = false;
 
     dotenv().ok();
     let developer_key = env::var("DEVELOPER_KEY").expect("DEVELOPER_KEY must be set");
 
     match get_channel_id(channel_username.to_string().clone(), developer_key.clone()).await {
         Ok(channel_id) => {
-            match get_channel_videos(channel_id, developer_key, max_recent_vid).await {
+            match get_channel_videos(channel_id, developer_key, max_recent_vid, Some(no_shorts)).await {
                 Ok(videos) => display_vid(videos, max_display_vid),
                 Err(e) => eprintln!("Error getting videos: \n{}", e)
             } 
